@@ -64,7 +64,7 @@ jobs:
       - name: Build and Push Versioned Tags
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./runner
           file: ./runner/${{ matrix.name }}.dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ inputs.push_to_registries }}
