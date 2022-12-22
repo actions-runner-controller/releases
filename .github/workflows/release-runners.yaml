@@ -1,0 +1,81 @@
+name: Manual Runner Images Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_version:
+        description: 'Runner Version'
+        required: true
+        default: '2.300.2'
+      docker_version:
+        description: 'Docker Version'
+        required: false
+        default: '20.10.12'
+      runner_container_hooks_version:
+        description: 'Runner Container Hooks Version'
+        required: true
+        default: '0.2.0'
+
+env:
+  DOCKERHUB_USERNAME: summerwind
+  TARGET_ORG: actions-runner-controller
+  TARGET_REPO: actions-runner-controller
+
+jobs:
+  build-runners:
+    name: Build ${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: actions-runner
+            os-name: ubuntu
+            os-version: 20.04
+          - name: actions-runner-dind
+            os-name: ubuntu
+            os-version: 20.04
+          - name: actions-runner-dind-rootless
+            os-name: ubuntu
+            os-version: 20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Environment
+        id: vars
+        uses: ./.github/actions/setup-docker-environment
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          ghcr_username: ${{ github.actor }}
+          ghcr_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Versioned Tags
+        uses: docker/build-push-action@v3
+        with:
+          context: ./runner
+          file: ./runner/${{ matrix.name }}.dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            RUNNER_VERSION=${{ inputs.runner_version }}
+            DOCKER_VERSION=${{ inputs.docker_version }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+          cache-from: type=gha,scope=build-${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
+      
+      - name: Troubleshoot
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
