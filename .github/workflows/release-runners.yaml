@@ -15,6 +15,10 @@ on:
         description: 'Runner Container Hooks Version'
         required: true
         default: '0.2.0'
+      push_to_registries:
+        description: 'Push to registries'
+        required: true
+        default: 'false'
 
 env:
   DOCKERHUB_USERNAME: summerwind
@@ -63,7 +67,7 @@ jobs:
           context: ./runner
           file: ./runner/${{ matrix.name }}.dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ inputs.push_to_registries }}
           build-args: |
             RUNNER_VERSION=${{ inputs.runner_version }}
             DOCKER_VERSION=${{ inputs.docker_version }}
@@ -77,7 +81,3 @@ jobs:
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
           cache-from: type=gha,scope=build-${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
-      
-      - name: Troubleshoot
-        if: failure()
-        uses: mxschmitt/action-tmate@v3
