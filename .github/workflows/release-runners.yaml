@@ -73,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./runner
-          file: ./runner/${{ matrix.name }}.dockerfile
+          file: ./runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}.dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ inputs.push_to_registries }}
           build-args: |
