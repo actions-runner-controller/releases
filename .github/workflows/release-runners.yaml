@@ -15,6 +15,10 @@ on:
         description: 'Runner Container Hooks Version'
         required: true
         default: '0.2.0'
+      sha:
+        description: 'Commit Used To Build The Images'
+        required: false
+        default: ''
       push_to_registries:
         description: 'Push to registries'
         required: true
@@ -57,6 +61,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: actions/actions-runner-controller
+          ref: ${{ github.event.inputs.sha }}
 
       - name: Setup Docker Environment
         id: vars
@@ -66,14 +71,7 @@ jobs:
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Check short SHA
-        id: sha_check
-        run: |
-          if [ -z "${{ steps.vars.outputs.sha_short }}" ]; then
-            echo "The short SHA is empty. Generating sha from version numbers"
-            echo "sha_short=$(echo ${{ inputs.runner_version }}-${{ inputs.docker_version }}-${{ inputs.runner_container_hooks_version }} | sha1sum | cut -c1-7)" >> $GITHUB_OUTPUT
-          fi
+          sha: ${{ inputs.sha }}
 
       - name: Build and Push Versioned Tags
         uses: docker/build-push-action@v3
@@ -88,7 +86,7 @@ jobs:
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.sha_check.outputs.sha_short }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}

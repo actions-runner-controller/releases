@@ -13,6 +13,10 @@ inputs:
   ghcr_password:
     description: "GHCR password. Usually set from the secrets.GITHUB_TOKEN variable"
     required: true
+  sha:
+    description: "Commit Used To Build The Images"
+    required: false
+    default: ''
 
 outputs:
   sha_short:
@@ -25,7 +29,11 @@ runs:
     - name: Get Short SHA
       id: vars
       run: |
-        echo ::set-output name=sha_short::${GITHUB_SHA::7}
+        if [ -n "${{ inputs.sha }}" ]; then
+          echo "sha_short=${{ inputs.sha }}" | cut -c1-7
+        else
+          echo "sha_short=$(git rev-parse HEAD | cut -c1-7)"
+        fi
       shell: bash
 
     - name: Set up QEMU
