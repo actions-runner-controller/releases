@@ -80,7 +80,7 @@ jobs:
           if [ -n "${{ inputs.sha }}" ]; then
             echo "sha_short=${{ inputs.sha }}" | cut -c1-7
           else
-            echo "sha_short=$(git --git-dir ./arc/runner rev-parse HEAD | cut -c1-7)"
+            echo "sha_short=$(git --git-dir ./arc rev-parse HEAD | cut -c1-7)"
           fi
         shell: bash
 
