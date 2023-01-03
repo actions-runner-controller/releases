@@ -31,7 +31,6 @@ on:
         default: false
 
 env:
-  DOCKERHUB_USERNAME: summerwind
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
@@ -64,7 +63,7 @@ jobs:
         id: vars
         uses: ./.github/actions/setup-docker-environment
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
@@ -88,9 +87,9 @@ jobs:
             DOCKER_VERSION=${{ inputs.docker_version }}
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
