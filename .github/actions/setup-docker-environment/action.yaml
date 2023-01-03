@@ -26,16 +26,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Get Short SHA
-      id: vars
-      run: |
-        if [ -n "${{ inputs.sha }}" ]; then
-          echo "sha_short=${{ inputs.sha }}" | cut -c1-7
-        else
-          echo "sha_short=$(git rev-parse HEAD | cut -c1-7)"
-        fi
-      shell: bash
-
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
