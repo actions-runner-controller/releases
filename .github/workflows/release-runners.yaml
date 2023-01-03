@@ -18,7 +18,13 @@ on:
       push_to_registries:
         description: 'Push to registries'
         required: true
-        default: 'false'
+        type: boolean
+        default: false
+      troubleshoot:
+        description: 'Troubleshoot'
+        required: false
+        type: boolean
+        default: false
 
 env:
   DOCKERHUB_USERNAME: summerwind
@@ -90,3 +96,6 @@ jobs:
           cache-from: type=gha,scope=build-${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
 
+      - name: Troubleshoot with a tmate ssh session
+        if: ${{ inputs.troubleshoot }}
+        uses: mxschmitt/action-tmate@v3
