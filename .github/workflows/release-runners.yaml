@@ -48,12 +48,12 @@ jobs:
           - name: actions-runner
             os-name: ubuntu
             os-version: 20.04
-          - name: actions-runner-dind
-            os-name: ubuntu
-            os-version: 20.04
-          - name: actions-runner-dind-rootless
-            os-name: ubuntu
-            os-version: 20.04
+          # - name: actions-runner-dind
+          #   os-name: ubuntu
+          #   os-version: 20.04
+          # - name: actions-runner-dind-rootless
+          #   os-name: ubuntu
+          #   os-version: 20.04
 
     steps:
       - name: Checkout
@@ -84,26 +84,26 @@ jobs:
           fi
         shell: bash
 
-      - name: Build and Push Versioned Tags
-        uses: docker/build-push-action@v3
-        with:
-          context: ./arc/runner
-          file: ./arc/runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}.dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: ${{ inputs.push_to_registries }}
-          build-args: |
-            RUNNER_VERSION=${{ inputs.runner_version }}
-            DOCKER_VERSION=${{ inputs.docker_version }}
-            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
-          cache-from: type=gha,scope=build-${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
+      # - name: Build and Push Versioned Tags
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     context: ./arc/runner
+      #     file: ./arc/runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}.dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     push: ${{ inputs.push_to_registries }}
+      #     build-args: |
+      #       RUNNER_VERSION=${{ inputs.runner_version }}
+      #       DOCKER_VERSION=${{ inputs.docker_version }}
+      #       RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
+      #     tags: |
+      #       ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+      #       ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+      #       ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
+      #       ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
+      #       ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+      #       ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+      #     cache-from: type=gha,scope=build-${{ matrix.name }}
+      #     cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
 
       - name: Troubleshoot with a tmate ssh session
         if: ${{ inputs.troubleshoot }}
