@@ -43,6 +43,17 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Setup Docker Environment
+        uses: ./.github/actions/setup-docker-environment
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          ghcr_username: ${{ github.actor }}
+          ghcr_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           repository: actions/actions-runner-controller
           path: arc/
@@ -77,14 +88,6 @@ jobs:
       #   run: |
       #     make github-release
       #   working-directory: arc/
-
-      - name: Setup Docker Environment
-        uses: ./.github/actions/setup-docker-environment
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-          ghcr_username: ${{ github.actor }}
-          ghcr_password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push
         uses: docker/build-push-action@v3
