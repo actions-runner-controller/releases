@@ -79,7 +79,7 @@ jobs:
       - name: Get Short SHA
         id: vars
         run: |
-            echo "sha_short=$(git -C $GITHUB_WORKSPACE/arc rev-parse HEAD | cut -c1-7)" >> $GITHUB_OUTPUT
+            echo "sha_short=$(git -C $GITHUB_WORKSPACE/arc rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build and Push Versioned Tags
