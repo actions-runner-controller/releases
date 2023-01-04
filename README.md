@@ -33,3 +33,12 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 #### Using the UI
 
 You can also trigger the workflow from the UI by clicking on the "Run workflow" button on the [workflow page](https://github.com/actions-runner-controller/releases/actions/workflows/release-runners.yaml).
+
+### Publish canary images
+
+You can trigger the workflow from the CLI using the following command:
+
+```bash
+jq -n '{"event_type": "canary", "client_payload": {"short_sha": "ef7ats", "push_to_registries": false}}' \
+    | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
+```

@@ -43,16 +43,19 @@ jobs:
         with:
           repository: actions/actions-runner-controller
           path: arc/
+          ref: ${{ github.event.client_payload.short_sha }}
 
       # Considered unstable builds
       # See Issue #285, PR #286, and PR #323 for more information
+      # If push_to_registries is not provided, we'll default to false
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
           file: arc/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=canary-${{ github.event.client_payload.short_sha }}
-          push: ${{ github.event.client_payload.push_to_registries }}
+          # push: ${{ github.event.client_payload.push_to_registries || false }}
+          push: false
           tags: |
             ${{ secrets.DOCKER_USER }}/actions-runner-controller:canary
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
