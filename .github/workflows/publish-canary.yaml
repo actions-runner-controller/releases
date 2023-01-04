@@ -57,6 +57,7 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
+          context: ./arc
           file: ./arc/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=canary-${{ github.steps.vars.outputs.short_sha }}
