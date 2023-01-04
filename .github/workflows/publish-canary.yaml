@@ -39,17 +39,21 @@ jobs:
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get Short SHA
+        id: vars
+        run: |
+          if [ -z "${{ github.event.client_payload.sha }}" ]; then
+            echo "client_payload.sha cannot be empty"
+            exit 1
+          fi
+          echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
           repository: actions/actions-runner-controller
           path: arc/
           ref: ${{ github.event.client_payload.sha }}
-
-      - name: Get Short SHA
-        id: vars
-        run: |
-          echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       # Considered unstable builds
       # See Issue #285, PR #286, and PR #323 for more information
