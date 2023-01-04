@@ -28,6 +28,19 @@ jobs:
     name: Build and Publish Canary Image
     runs-on: ubuntu-latest
     steps:
+      - name: Input validation
+        id: vars
+        run: |
+          if [ -z "${{ github.event.client_payload.sha }}" ]; then
+            echo "client_payload.sha cannot be empty"
+            exit 1
+          fi
+          echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+          if [ -z "${{ github.event.client_payload.push_to_registries }}" ]; then
+            echo "client_payload.push_to_registries cannot be empty"
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -39,14 +52,6 @@ jobs:
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get Short SHA
-        id: vars
-        run: |
-          if [ -z "${{ github.event.client_payload.sha }}" ]; then
-            echo "client_payload.sha cannot be empty"
-            exit 1
-          fi
-          echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -65,8 +70,7 @@ jobs:
           file: ./arc/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=canary-${{ github.steps.vars.outputs.short_sha }}
-          # push: ${{ github.event.client_payload.push_to_registries || false }}
-          push: false
+          push: ${{ github.event.client_payload.push_to_registries || false }}
           tags: |
             ${{ env.DOCKER_USER }}/actions-runner-controller:canary
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary

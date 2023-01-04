@@ -26,7 +26,7 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 | runner_version | The version of the runner binaries to use | `2.300.2` |
 | docker_version | The version of the docker binaries to use | `20.10.12` |
 | runner_container_hooks_version | The version of the runner container hooks to use | `0.2.0` |
-| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout`  | '' |
+| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | '' |
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
 | troubleshoot | Whether to enable troubleshooting mode. This will start a tmate reverse ssh session | false |
 
@@ -34,11 +34,20 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 
 You can also trigger the workflow from the UI by clicking on the "Run workflow" button on the [workflow page](https://github.com/actions-runner-controller/releases/actions/workflows/release-runners.yaml).
 
-### Publish canary images
+### Publish controller canary images
 
 This workflow is triggered whenever a new commit is pushed to the `master` branch in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
+
+For troubleshooting purposes you can run this workflow with:
 
 ```bash
 jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530d40d8f33cc9471716f5", "push_to_registries": false}}' \
     | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
 ```
+
+<!-- Table of Paramters -->
+| Parameter | Description | Default |
+| --- | --- | --- |
+| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images  | Required. Cannot be empty |
+| push_to_registries | Whether to push the images to the registries. Use false to test the build | Required. Cannot be empty |
+

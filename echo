@@ -1,7 +1,0 @@
-{
-    "event_type": "canary",
-    "client_payload": {
-        "short_sha": "ef7ats",
-        "push_to_registries": false
-    }
-}
