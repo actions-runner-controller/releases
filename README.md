@@ -51,3 +51,11 @@ jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530
 | sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images  | Required. Cannot be empty |
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | Required. Cannot be empty |
 
+### Publish controller images
+
+This workflow is triggered whenever a new release is published in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
+
+```bash
+jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "push_to_registries": false}}' \
+    | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
+```

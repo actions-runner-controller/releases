@@ -1,0 +1,104 @@
+name: Publish ARC
+
+# This workflow anticipates a repository_dispatch event from the actions/actions-runner-controller repository
+on:
+  repository_dispatch:
+    types: [arc]
+    # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch
+    # Expects the following JSON payload:
+    # {
+    #   "client_payload": {
+    #     "release_tag_name": "v0.18.0"
+    #     "push_to_registries": true
+    #   }
+    # }
+
+# https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
+permissions:
+ contents: write 
+ packages: write
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  TARGET_ORG: actions-runner-controller
+  TARGET_REPO: actions-runner-controller
+
+jobs:
+  release-controller:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USER }}
+    steps:
+      - name: Input validation
+        run: |
+          if [ -z "${{ github.event.client_payload.push_to_registries }}" ]; then
+            echo "client_payload.push_to_registries cannot be empty"
+            exit 1
+          fi
+          if [ -z "${{ github.event.client_payload.release_tag_name }}" ]; then
+            echo "client_payload.release_tag_name cannot be empty"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: actions/actions-runner-controller
+          path: arc/
+          ref: ${{ github.event.client_payload.release_tag_name }}
+
+      - name: Get short SHA
+        id: get_short_sha
+        run: |
+          echo "short_sha=$(git rev-parse --short ${{ github.event.client_payload.release_tag_name }})" >> $GITHUB_OUTPUT
+        shell: bash
+        working-directory: arc/
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.2'
+
+      - name: Install tools
+        run: |
+          curl -L -O https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.2.0/kubebuilder_2.2.0_linux_amd64.tar.gz
+          tar zxvf kubebuilder_2.2.0_linux_amd64.tar.gz
+          sudo mv kubebuilder_2.2.0_linux_amd64 /usr/local/kubebuilder
+          curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
+          sudo mv kustomize /usr/local/bin
+          curl -L -O https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
+          tar zxvf ghr_v0.13.0_linux_amd64.tar.gz
+          sudo mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
+
+      - name: Upload artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          make github-release
+        working-directory: arc/
+
+      - name: Setup Docker Environment
+        uses: ./.github/actions/setup-docker-environment
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          ghcr_username: ${{ github.actor }}
+          ghcr_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: arc/
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ github.event.client_payload.release_tag_name }}
+          push: ${{ github.event.client_payload.push_to_registries }}
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_short_sha.outputs.sha_short }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:latest
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_short_sha.outputs.sha_short }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
