@@ -70,12 +70,13 @@ jobs:
           tar zxvf ghr_v0.13.0_linux_amd64.tar.gz
           sudo mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
 
-      - name: Upload artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          make github-release
-        working-directory: arc/
+      # This needs to remain in the original workflow file
+      # - name: Upload artifacts
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     make github-release
+      #   working-directory: arc/
 
       - name: Setup Docker Environment
         uses: ./.github/actions/setup-docker-environment
