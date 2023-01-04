@@ -31,15 +31,15 @@ jobs:
       - name: Input validation
         id: vars
         run: |
+          if [ -z "${{ github.event.client_payload.push_to_registries }}" ]; then
+            echo "client_payload.push_to_registries cannot be empty"
+            exit 1
+          fi
           if [ -z "${{ github.event.client_payload.sha }}" ]; then
             echo "client_payload.sha cannot be empty"
             exit 1
           fi
           echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
-          if [ -z "${{ github.event.client_payload.push_to_registries }}" ]; then
-            echo "client_payload.push_to_registries cannot be empty"
-            exit 1
-          fi
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
           context: ./arc
           file: ./arc/Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: VERSION=canary-${{ github.steps.vars.outputs.short_sha }}
+          build-args: VERSION=canary-${{ steps.vars.outputs.short_sha }}
           push: ${{ github.event.client_payload.push_to_registries }}
           tags: |
             ${{ env.DOCKER_USER }}/actions-runner-controller:canary
