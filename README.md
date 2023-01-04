@@ -36,7 +36,7 @@ You can also trigger the workflow from the UI by clicking on the "Run workflow" 
 
 ### Publish canary images
 
-You can trigger the workflow from the CLI using the following command:
+This workflow is triggered whenever a new commit is pushed to the `master` branch in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
 
 ```bash
 jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530d40d8f33cc9471716f5", "push_to_registries": false}}' \
