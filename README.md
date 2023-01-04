@@ -4,7 +4,9 @@ This repository contains the workflows needed to release new runner images whene
 
 ## Usage
 
-### Triggering a new release using gh cli
+### Release new runner images
+
+### Using the CLI
 
 You can trigger the workflow from the CLI using the following command:
 
@@ -28,6 +30,6 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
 | troubleshoot | Whether to enable troubleshooting mode. This will start a tmate reverse ssh session | false |
 
-### Using the UI
+#### Using the UI
 
 You can also trigger the workflow from the UI by clicking on the "Run workflow" button on the [workflow page](https://github.com/actions-runner-controller/releases/actions/workflows/release-runners.yaml).
