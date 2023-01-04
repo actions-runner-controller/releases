@@ -60,9 +60,9 @@ jobs:
           ref: ${{ github.event.client_payload.release_tag_name }}
 
       - name: Get short SHA
-        id: get_short_sha
+        id: get_sha_short
         run: |
-          echo "short_sha=$(git rev-parse --short ${{ github.event.client_payload.release_tag_name }})" >> $GITHUB_OUTPUT
+          echo "sha_short=$(git rev-parse --short ${{ github.event.client_payload.release_tag_name }})" >> $GITHUB_OUTPUT
         shell: bash
         working-directory: arc/
 
@@ -93,16 +93,16 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./arc
-          file: Dockerfile
+          file: ./arc/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=${{ github.event.client_payload.release_tag_name }}
           push: ${{ github.event.client_payload.push_to_registries }}
           tags: |
             ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:latest
             ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
-            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_short_sha.outputs.sha_short }}
+            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_sha_short.outputs.sha_short }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_short_sha.outputs.sha_short }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_sha_short.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
