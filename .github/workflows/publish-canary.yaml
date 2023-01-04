@@ -19,6 +19,7 @@ permissions:
   packages: write
 
 env:
+  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
@@ -62,7 +63,7 @@ jobs:
           # push: ${{ github.event.client_payload.push_to_registries || false }}
           push: false
           tags: |
-            ${{ secrets.DOCKER_USER }}/actions-runner-controller:canary
+            ${{ env.DOCKER_USER }}/actions-runner-controller:canary
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
           cache-from: type=gha,scope=arc-canary
           cache-to: type=gha,mode=max,scope=arc-canary
