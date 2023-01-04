@@ -1,0 +1,60 @@
+name: Publish Canary Image
+
+on:
+  repository_dispatch:
+    types: [canary]
+    # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch
+    # Expects the following JSON payload:
+    # {
+    #   "client_payload": {
+    #     "short_sha": "1234567"
+    #     "push_to_registries": true
+    #   }
+    # }
+
+# https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
+permissions:
+  contents: read
+  packages: write
+
+env:
+  TARGET_ORG: actions-runner-controller
+  TARGET_REPO: actions-runner-controller
+
+jobs:
+  canary-build:
+    name: Build and Publish Canary Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Environment
+        id: vars
+        uses: ./.github/actions/setup-docker-environment
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          ghcr_username: ${{ github.actor }}
+          ghcr_password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: actions/actions-runner-controller
+          path: arc/
+
+      # Considered unstable builds
+      # See Issue #285, PR #286, and PR #323 for more information
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          file: arc/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=canary-${{ github.event.client_payload.short_sha }}
+          push: ${{ github.event.client_payload.push_to_registries }}
+          tags: |
+            ${{ secrets.DOCKER_USER }}/actions-runner-controller:canary
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
+          cache-from: type=gha,scope=arc-canary
+          cache-to: type=gha,mode=max,scope=arc-canary
