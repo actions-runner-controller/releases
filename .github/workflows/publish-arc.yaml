@@ -92,7 +92,7 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
-          context: arc/
+          context: ./arc
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VERSION=${{ github.event.client_payload.release_tag_name }}
