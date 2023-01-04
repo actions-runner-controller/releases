@@ -16,6 +16,7 @@ on:
         required: true
         default: '0.2.0'
       sha:
+        # If the sha is not provided, we'll default to the commit HEAD is pointing to
         description: 'Commit Used To Build The Images'
         required: false
         default: ''
