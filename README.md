@@ -39,6 +39,6 @@ You can also trigger the workflow from the UI by clicking on the "Run workflow" 
 You can trigger the workflow from the CLI using the following command:
 
 ```bash
-jq -n '{"event_type": "canary", "client_payload": {"short_sha": "ef7ats", "push_to_registries": false}}' \
+jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530d40d8f33cc9471716f5", "push_to_registries": false}}' \
     | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
 ```

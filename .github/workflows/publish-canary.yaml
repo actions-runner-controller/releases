@@ -1,5 +1,6 @@
 name: Publish Canary Image
 
+# This workflow anticipates a repository_dispatch event from the actions/actions-runner-controller repository
 on:
   repository_dispatch:
     types: [canary]
@@ -7,7 +8,7 @@ on:
     # Expects the following JSON payload:
     # {
     #   "client_payload": {
-    #     "short_sha": "1234567"
+    #     "sha": "84104de74b8e9e555f530d40d8f33cc9471716f5"
     #     "push_to_registries": true
     #   }
     # }
@@ -43,7 +44,12 @@ jobs:
         with:
           repository: actions/actions-runner-controller
           path: arc/
-          ref: ${{ github.event.client_payload.short_sha }}
+          ref: ${{ github.event.client_payload.sha }}
+
+      - name: Get Short SHA
+        id: vars
+        run: |
+          echo "short_sha=$(echo ${{ github.event.client_payload.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       # Considered unstable builds
       # See Issue #285, PR #286, and PR #323 for more information
@@ -53,7 +59,7 @@ jobs:
         with:
           file: arc/Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: VERSION=canary-${{ github.event.client_payload.short_sha }}
+          build-args: VERSION=canary-${{ github.steps.vars.outputs.short_sha }}
           # push: ${{ github.event.client_payload.push_to_registries || false }}
           push: false
           tags: |
