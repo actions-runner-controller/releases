@@ -67,3 +67,7 @@ jobs:
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
           cache-from: type=gha,scope=arc-canary
           cache-to: type=gha,mode=max,scope=arc-canary
+
+      - name: Troubleshoot with a tmate ssh session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
