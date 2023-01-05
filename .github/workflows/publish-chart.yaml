@@ -78,6 +78,7 @@ jobs:
         with:
           repository: ${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}
           path: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_BRANCH }}
 
       - name: Push index.yaml
         run: |
