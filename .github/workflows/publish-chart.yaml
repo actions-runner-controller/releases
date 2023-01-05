@@ -79,6 +79,7 @@ jobs:
           repository: ${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}
           path: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_BRANCH }}
+          token: ${{ steps.get_workflow_token.outputs.token }}
 
       - name: Push index.yaml
         run: |
