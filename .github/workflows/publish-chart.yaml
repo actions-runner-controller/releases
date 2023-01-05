@@ -60,13 +60,10 @@ jobs:
           install_only: true
           install_dir: ${{ github.workspace }}/bin
 
-      - name: troubleshoot
-        uses: mxschmitt/action-tmate@v3
-
       - name: Run chart-releaser
         run: |
           cr package \
-            ${{ github.workspace }}/actions-runner-controller/ \
+            ${{ github.workspace }}/charts/actions-runner-controller/ \
             --config ${{ github.workspace }}/config.yaml \
             --package-path .cr-release-packages
 
