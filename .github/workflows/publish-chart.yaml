@@ -55,12 +55,17 @@ jobs:
           skip_packaging: true
           EOF
 
-      - name: Run chart-releaser
+      - name: Install chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         with:
-          config: config.yaml
-        env:
-          CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
+          install_only: true
+          install_dir: ${{ github.workspace }}/bin
 
-      # - name: troubleshoot
-      #   uses: mxschmitt/action-tmate@v3
+      - name: Run chart-releaser
+        run: |
+          ${{ github.workspace }}/bin/cr upload \
+            --config ${{ github.workspace }}/config.yaml \
+            --token ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: troubleshoot
+        uses: mxschmitt/action-tmate@v3
