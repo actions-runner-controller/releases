@@ -73,6 +73,11 @@ jobs:
             --token ${{ steps.get_workflow_token.outputs.token }} \
             || true
 
+          cr index \
+            --config ${{ github.workspace }}/config.yaml \
+            --pages-branch 'gh-pages' \
+            --token ${{ steps.get_workflow_token.outputs.token }}
+
       - name: Checkout pages repository
         uses: actions/checkout@v3
         with:
@@ -81,10 +86,3 @@ jobs:
           ref: ${{ env.TARGET_BRANCH }}
           token: ${{ steps.get_workflow_token.outputs.token }}
 
-      - name: Push index.yaml
-        run: |
-          cr index \
-            --config ${{ github.workspace }}/config.yaml \
-            --index-path ${{ github.workspace }}/${{ env.TARGET_REPO }} \
-            --push \
-            --token ${{ steps.get_workflow_token.outputs.token }}
