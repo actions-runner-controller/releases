@@ -53,3 +53,5 @@ jobs:
           CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
 
+      - name: troubleshoot
+        uses: mxschmitt/action-tmate@v3
