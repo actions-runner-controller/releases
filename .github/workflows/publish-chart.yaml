@@ -88,4 +88,3 @@ jobs:
             --index-path ${{ github.workspace }}/${{ env.TARGET_REPO }} \
             --push \
             --token ${{ steps.get_workflow_token.outputs.token }}
-        working-directory: ./${{ env.TARGET_REPO }}
