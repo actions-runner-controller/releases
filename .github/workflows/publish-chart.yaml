@@ -71,3 +71,10 @@ jobs:
             --package-path .cr-release-packages \
             --config ${{ github.workspace }}/config.yaml \
             --token ${{ steps.get_workflow_token.outputs.token }}
+
+          cr index \
+            --git-repo ${{ env.TARGET_REPO }} \
+            --owner ${{ env.TARGET_ORG }} \
+            --pages-branch ${{ env.TARGET_BRANCH }} \
+            --push \
+            --token ${{ steps.get_workflow_token.outputs.token }}
