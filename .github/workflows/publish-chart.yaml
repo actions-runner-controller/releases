@@ -85,8 +85,7 @@ jobs:
         run: |
           cr index \
             --config ${{ github.workspace }}/config.yaml \
-            --index-path index.yaml \
-            --pages-index-path index.yaml \
+            --index-path ${{ github.workspace }} \
             --push \
             --token ${{ steps.get_workflow_token.outputs.token }}
         working-directory: ${{ env.TARGET_REPO }}
