@@ -45,6 +45,10 @@ jobs:
           application_private_key: ${{ secrets.ACTIONS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
 
+      - name: Create a tag -- TO BE REMOVED
+        run: |
+          git tag v0.27.0
+
       - name: Create config file
         run: |
           cat << EOF > config.yaml
