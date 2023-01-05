@@ -52,7 +52,6 @@ jobs:
           owner: ${{ env.TARGET_ORG }}
           git-repo: ${{ env.TARGET_REPO }}
           pages-branch: ${{ env.TARGET_BRANCH }}
-          skip_packaging: true
           EOF
 
       - name: Install chart-releaser
