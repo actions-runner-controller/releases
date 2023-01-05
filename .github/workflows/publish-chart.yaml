@@ -76,5 +76,7 @@ jobs:
             --git-repo ${{ env.TARGET_REPO }} \
             --owner ${{ env.TARGET_ORG }} \
             --pages-branch ${{ env.TARGET_BRANCH }} \
+            --index-path index.yaml \
+            --pages-index-path index.yaml \
             --push \
             --token ${{ steps.get_workflow_token.outputs.token }}
