@@ -45,4 +45,5 @@ jobs:
           CR_GIT_REPO: "${{ env.TARGET_REPO }}"
           CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
+          CR_SKIP_EXISTING: false
 
