@@ -60,6 +60,9 @@ jobs:
           install_only: true
           install_dir: ${{ github.workspace }}/bin
 
+      - name: troubleshoot
+        uses: mxschmitt/action-tmate@v3
+
       - name: Run chart-releaser
         run: |
           ${{ github.workspace }}/bin/cr package \
@@ -69,6 +72,3 @@ jobs:
           ${{ github.workspace }}/bin/cr upload \
             --config ${{ github.workspace }}/config.yaml \
             --token ${{ steps.get_workflow_token.outputs.token }}
-
-      - name: troubleshoot
-        uses: mxschmitt/action-tmate@v3
