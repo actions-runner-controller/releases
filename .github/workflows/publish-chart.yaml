@@ -46,7 +46,7 @@ jobs:
 
       - name: Create config file
         run: |
-          echo <<EOF > config.yaml
+          cat << EOF > config.yaml
           owner: ${{ env.TARGET_ORG }}
           git-repo: ${{ env.TARGET_REPO }}
           pages-branch: ${{ env.TARGET_BRANCH }}
