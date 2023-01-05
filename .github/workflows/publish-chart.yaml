@@ -44,13 +44,18 @@ jobs:
           application_private_key: ${{ secrets.ACTIONS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
 
+      - name: Create config file
+        run: |
+          echo <<EOF > config.yaml
+          owner: ${{ env.TARGET_ORG }}
+          git-repo: ${{ env.TARGET_REPO }}
+          pages-branch: ${{ env.TARGET_BRANCH }}
+          commit: ${{ github.event.client_payload.since_sha }}
+          EOF
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         env:
-          CR_COMMIT: "${{ github.event.client_payload.since_sha }}"
-          CR_OWNER: "${{ env.TARGET_ORG }}"
-          CR_GIT_REPO: "${{ env.TARGET_REPO }}"
-          CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
 
       - name: troubleshoot
