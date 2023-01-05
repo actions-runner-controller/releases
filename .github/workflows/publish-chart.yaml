@@ -46,6 +46,7 @@ jobs:
 
       - name: Create a tag -- TO BE REMOVED
         run: |
+          git fetch ${{ github.event.client_payload.since_sha }}
           git tag v0.27.0 ${{ github.event.client_payload.since_sha }}
 
       - name: Create config file
