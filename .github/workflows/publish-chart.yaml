@@ -41,9 +41,9 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         env:
+          CR_COMMIT: "3ede9b5a0159a5e0703ccae6eebfdc89defe2b8f"
           CR_OWNER: "${{ env.TARGET_ORG }}"
           CR_GIT_REPO: "${{ env.TARGET_REPO }}"
           CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
-          CR_SKIP_EXISTING: false
 
