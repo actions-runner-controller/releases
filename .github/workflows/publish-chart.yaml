@@ -87,3 +87,16 @@ jobs:
           ref: ${{ env.TARGET_BRANCH }}
           token: ${{ steps.get_workflow_token.outputs.token }}
 
+      - name: Copy index.yaml
+        run: |
+          cp ${{ github.workspace }}/index.yaml ${{ env.TARGET_REPO }}/index.yaml
+      
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          commit_message: Update index.yaml
+          repository: ${{ github.workspace }}/${{ env.TARGET_REPO }}
+          commit_user_name: ${{ github.actor }}
+          commit_user_email: ${{ github.actor }}@users.noreply.github.com
+          commit_author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
