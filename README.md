@@ -64,3 +64,12 @@ jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | Required. Cannot be empty |
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false.
+
+### Publish helm charts
+
+This workflow is triggered by [this workflow](https://github.com/actions/actions-runner-controller/blob/master/.github/workflows/publish-chart.yaml) whenever a new helm chart needs to be published.
+
+```bash
+jq -n '{"event_type": "chart"}' \
+    | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
+```

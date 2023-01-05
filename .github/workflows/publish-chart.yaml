@@ -1,0 +1,48 @@
+name: Publish Helm Chart
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch
+    types: [chart]
+
+permissions:
+  contents: read
+
+env:
+  TARGET_ORG: actions-runner-controller
+  TARGET_REPO: charts-test-repo
+  TARGET_BRANCH: main
+
+jobs:
+  publish-chart:
+    name: Publish Chart
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: actions/actions-runner-controller
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.ACTIONS_ACCESS_APP_ID }}
+          application_private_key: ${{ secrets.ACTIONS_ACCESS_PK }}
+          organization: ${{ env.TARGET_ORG }}
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.1
+        env:
+          CR_OWNER: "${{ env.TARGET_ORG }}"
+          CR_GIT_REPO: "${{ env.TARGET_REPO }}"
+          CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"
+          CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
+
