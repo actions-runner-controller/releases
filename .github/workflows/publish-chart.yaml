@@ -46,10 +46,9 @@ jobs:
           application_private_key: ${{ secrets.ACTIONS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
 
-      # - name: Create a tag -- TO BE REMOVED
-      #   run: |
-      #     git fetch origin ${{ github.event.client_payload.since_sha }}
-      #     git tag v0.27.0 ${{ github.event.client_payload.since_sha }}
+      - name: Create a tag -- TO BE REMOVED
+        run: |
+          git tag v0.27.0 ${{ github.event.client_payload.since_sha }}
 
       - name: Create config file
         run: |
@@ -63,6 +62,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.4.1
         with:
           config: config.yaml
+          skip_packaging: true
         env:
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
 
