@@ -46,25 +46,21 @@ jobs:
           application_private_key: ${{ secrets.ACTIONS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
 
-      - name: Create a tag -- TO BE REMOVED
-        run: |
-          git tag v0.27.0 ${{ github.event.client_payload.since_sha }}
-
       - name: Create config file
         run: |
           cat << EOF > config.yaml
           owner: ${{ env.TARGET_ORG }}
           git-repo: ${{ env.TARGET_REPO }}
           pages-branch: ${{ env.TARGET_BRANCH }}
+          skip_packaging: true
           EOF
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         with:
           config: config.yaml
-          skip_packaging: true
         env:
           CR_TOKEN: "${{ steps.get_workflow_token.outputs.token }}"
 
-      - name: troubleshoot
-        uses: mxschmitt/action-tmate@v3
+      # - name: troubleshoot
+      #   uses: mxschmitt/action-tmate@v3
