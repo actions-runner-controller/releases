@@ -5,6 +5,12 @@ on:
   repository_dispatch:
     # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch
     types: [chart]
+    # Expects the following JSON payload:
+    # {
+    #   "client_payload": {
+    #     "since_sha": "332548093a62aeacd5e3737fcbe0d019055a1fb5"
+    #   }
+    # }
 
 permissions:
   contents: read
@@ -41,7 +47,7 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         env:
-          CR_COMMIT: "3ede9b5a0159a5e0703ccae6eebfdc89defe2b8f"
+          CR_COMMIT: "${{ github.event.client_payload.since_sha }}"
           CR_OWNER: "${{ env.TARGET_ORG }}"
           CR_GIT_REPO: "${{ env.TARGET_REPO }}"
           CR_PAGES_BRANCH: "${{ env.TARGET_BRANCH }}"

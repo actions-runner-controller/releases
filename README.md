@@ -70,6 +70,6 @@ jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530
 This workflow is triggered by [this workflow](https://github.com/actions/actions-runner-controller/blob/master/.github/workflows/publish-chart.yaml) whenever a new helm chart needs to be published.
 
 ```bash
-jq -n '{"event_type": "chart"}' \
+jq -n '{"event_type": "chart", "client_payload": {"since_sha": "332548093a62aeacd5e3737fcbe0d019055a1fb5"}}' \
     | gh api -X POST /repos/actions-runner-controller/releases/dispatches --input -
 ```
