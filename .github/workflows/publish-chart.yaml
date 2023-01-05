@@ -74,6 +74,7 @@ jobs:
 
           cr index \
             --config ${{ github.workspace }}/config.yaml \
+            --index-path ${{ github.workspace }}/index.yaml \
             --pages-branch 'gh-pages' \
             --pages-index-path 'index.yaml' \
             --token ${{ steps.get_workflow_token.outputs.token }}
