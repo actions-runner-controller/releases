@@ -51,7 +51,6 @@ jobs:
           cat << EOF > config.yaml
           owner: ${{ env.TARGET_ORG }}
           git-repo: ${{ env.TARGET_REPO }}
-          pages-branch: ${{ env.TARGET_BRANCH }}
           EOF
 
       - name: Install chart-releaser
