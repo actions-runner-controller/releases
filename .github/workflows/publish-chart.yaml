@@ -76,6 +76,7 @@ jobs:
           cr index \
             --config ${{ github.workspace }}/config.yaml \
             --pages-branch 'gh-pages' \
+            --pages-index-path 'index.yaml' \
             --token ${{ steps.get_workflow_token.outputs.token }}
 
       - name: Checkout pages repository
