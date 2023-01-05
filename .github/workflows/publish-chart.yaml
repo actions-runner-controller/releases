@@ -65,10 +65,12 @@ jobs:
 
       - name: Run chart-releaser
         run: |
-          ${{ github.workspace }}/bin/cr package \
+          cr package \
+            ${{ github.workspace }}/actions-runner-controller/ \
             --config ${{ github.workspace }}/config.yaml \
             --package-path .cr-release-packages
 
-          ${{ github.workspace }}/bin/cr upload \
+          cr upload \
+            --package-path .cr-release-packages \
             --config ${{ github.workspace }}/config.yaml \
             --token ${{ steps.get_workflow_token.outputs.token }}
