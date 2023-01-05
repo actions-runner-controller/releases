@@ -70,13 +70,21 @@ jobs:
           cr upload \
             --package-path .cr-release-packages \
             --config ${{ github.workspace }}/config.yaml \
-            --token ${{ steps.get_workflow_token.outputs.token }}
+            --token ${{ steps.get_workflow_token.outputs.token }} \
+            || true
 
+      - name: Checkout pages repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}
+          path: ${{ env.TARGET_REPO }}
+
+      - name: Push index.yaml
+        run: |
           cr index \
-            --git-repo ${{ env.TARGET_REPO }} \
-            --owner ${{ env.TARGET_ORG }} \
-            --pages-branch ${{ env.TARGET_BRANCH }} \
+            --config ${{ github.workspace }}/config.yaml \
             --index-path index.yaml \
             --pages-index-path index.yaml \
             --push \
             --token ${{ steps.get_workflow_token.outputs.token }}
+        working-directory: ${{ env.TARGET_REPO }}
