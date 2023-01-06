@@ -50,12 +50,27 @@ jobs:
           - name: actions-runner
             os-name: ubuntu
             os-version: 20.04
+            latest: "true"
+          - name: actions-runner
+            os-name: ubuntu
+            os-version: 22.04
+            latest: "false"
           - name: actions-runner-dind
             os-name: ubuntu
             os-version: 20.04
+            latest: "true"
+          - name: actions-runner-dind
+            os-name: ubuntu
+            os-version: 22.04
+            latest: "false"
           - name: actions-runner-dind-rootless
             os-name: ubuntu
             os-version: 20.04
+            latest: "true"
+          - name: actions-runner-dind-rootless
+            os-name: ubuntu
+            os-version: 22.04
+            latest: "false"
 
     steps:
       - name: Checkout
@@ -103,6 +118,23 @@ jobs:
           cache-from: type=gha,scope=build-${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
 
-      - name: Troubleshoot with a tmate ssh session
-        if: ${{ inputs.troubleshoot }}
-        uses: mxschmitt/action-tmate@v3
+      # NOTE : Only to be used on the 20.04 image until we remove the latest tag entirely
+      # at which point this step needs to be deleted
+      # https://github.com/actions/actions-runner-controller/issues/2056
+      - name: Build and Push Latest Tags
+        if: ${{ matrix.latest == 'true' }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ./arc/runner
+          file: ./arc/runner/${{ matrix.name }}.${{ matrix.os-name }}-${{ matrix.os-version }}.dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ inputs.push_to_registries }}
+          build-args: |
+            RUNNER_VERSION=${{ inputs.runner_version }}
+            DOCKER_VERSION=${{ inputs.docker_version }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
+          tags: |
+            ${{ env.DOCKER_USER }}/${{ matrix.name }}:latest
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
+          cache-from: type=gha,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+          cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}

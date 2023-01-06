@@ -1,6 +1,7 @@
 name: Publish Canary Image
 
-# This workflow anticipates a repository_dispatch event from the actions/actions-runner-controller repository
+# This workflow anticipates a repository_dispatch event from the following workflow:
+# https://github.com/actions/actions-runner-controller/blob/master/.github/workflows/publish-canary.yaml
 on:
   repository_dispatch:
     types: [canary]
@@ -74,6 +75,3 @@ jobs:
           cache-from: type=gha,scope=arc-canary
           cache-to: type=gha,mode=max,scope=arc-canary
 
-      - name: Troubleshoot with a tmate ssh session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3

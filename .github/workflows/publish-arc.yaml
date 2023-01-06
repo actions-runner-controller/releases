@@ -1,6 +1,7 @@
 name: Publish ARC
 
-# This workflow anticipates a repository_dispatch event from the actions/actions-runner-controller repository
+# This workflow anticipates a repository_dispatch event from the following workflow:
+# https://github.com/actions/actions-runner-controller/blob/master/.github/workflows/publish-arc.yaml
 on:
   repository_dispatch:
     types: [arc]
@@ -15,7 +16,7 @@ on:
 
 # https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
 permissions:
- contents: write 
+ contents: write
  packages: write
 
 env:
@@ -80,14 +81,6 @@ jobs:
           curl -L -O https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
           tar zxvf ghr_v0.13.0_linux_amd64.tar.gz
           sudo mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
-
-      # This needs to remain in the original workflow file
-      # - name: Upload artifacts
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     make github-release
-      #   working-directory: arc/
 
       - name: Build and Push
         uses: docker/build-push-action@v3

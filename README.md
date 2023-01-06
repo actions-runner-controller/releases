@@ -2,6 +2,8 @@
 
 This repository contains the workflows needed to release new runner images whenever a new version of the runner binaries are released. The images will be pushed to DockerHub and GHCR.
 
+The main reason why these workflows were extracted is that pushing container images to GHRC with GitHub App authentication is not possible at the moment.
+
 ## Usage
 
 ### Release new runner images
@@ -34,8 +36,7 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 
 You can also trigger the workflow from the UI by clicking on the "Run workflow" button on the [workflow page](https://github.com/actions-runner-controller/releases/actions/workflows/release-runners.yaml).
 
-
-### Publish controller images
+### Publish (arc) controller images
 
 This workflow is triggered whenever a new release is published in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
 
@@ -46,7 +47,7 @@ jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false.
 
-### Publish controller canary images
+### Publish canary images
 
 This workflow is triggered whenever a new commit is pushed to the `master` branch in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
 
