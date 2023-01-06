@@ -75,7 +75,7 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 | runner_version | The version of the runner binaries to use | `2.300.2` |
 | docker_version | The version of the docker binaries to use | `20.10.12` |
 | runner_container_hooks_version | The version of the runner container hooks to use | `0.2.0` |
-| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | '' |
+| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | Empty string. |
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
 
 ### Publish (arc) controller images (publish-arc.yaml)
@@ -89,8 +89,8 @@ jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| release_tag_name | The version of the runner binaries to use | None. Field required. |
-| push_to_registries | The version of the docker binaries to use | None. Field required. |
+| release_tag_name | The version of the runner binaries to use | Empty string. Field required. |
+| push_to_registries | The version of the docker binaries to use | Empty string. Field required. |
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false. Otherwise, built images will be pushed to the registries.
 
@@ -108,8 +108,8 @@ jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530
 <!-- Table of Paramters -->
 | Parameter | Description | Default |
 | --- | --- | --- |
-| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images  | None. Field required. |
-| push_to_registries | Whether to push the images to the registries. Use false to test the build | None. Field required. |
+| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images  | Empty string. Field required. |
+| push_to_registries | Whether to push the images to the registries. Use false to test the build | Empty string. Field required. |
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false.
 
@@ -124,4 +124,4 @@ jq -n '{"event_type": "chart", "client_payload": {"since_sha": "332548093a62aeac
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| since_sha | TBD | None. Field required. |
+| since_sha | TBD | Empty string. Field required. |
