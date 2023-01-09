@@ -32,7 +32,7 @@ on:
         default: false
 
 env:
-  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
@@ -79,7 +79,7 @@ jobs:
       - name: Setup Docker Environment
         uses: ./.github/actions/setup-docker-environment
         with:
-          username: ${{ env.DOCKER_USER }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
@@ -109,9 +109,9 @@ jobs:
             DOCKER_VERSION=${{ inputs.docker_version }}
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
-            ${{ env.DOCKER_USER }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ${{ env.DOCKER_USER }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
-            ${{ env.DOCKER_USER }}/${{ matrix.name }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
@@ -134,7 +134,7 @@ jobs:
             DOCKER_VERSION=${{ inputs.docker_version }}
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
-            ${{ env.DOCKER_USER }}/${{ matrix.name }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
           cache-from: type=gha,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}

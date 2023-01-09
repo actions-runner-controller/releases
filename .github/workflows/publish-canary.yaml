@@ -20,7 +20,7 @@ permissions:
   packages: write
 
 env:
-  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
@@ -46,7 +46,7 @@ jobs:
       - name: Setup Docker Environment
         uses: ./.github/actions/setup-docker-environment
         with:
-          username: ${{ secrets.DOCKER_USER }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           ghcr_username: ${{ github.actor }}
           ghcr_password: ${{ secrets.GITHUB_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
           build-args: VERSION=canary-${{ github.event.client_payload.sha }}
           push: ${{ github.event.client_payload.push_to_registries }}
           tags: |
-            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:canary
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:canary
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
           cache-from: type=gha,scope=arc-canary
           cache-to: type=gha,mode=max,scope=arc-canary

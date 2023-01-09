@@ -20,7 +20,7 @@ permissions:
  packages: write
 
 env:
-  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
@@ -29,7 +29,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USER }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     steps:
       - name: Input validation
         run: |
@@ -91,9 +91,9 @@ jobs:
           build-args: VERSION=${{ github.event.client_payload.release_tag_name }}
           push: ${{ github.event.client_payload.push_to_registries }}
           tags: |
-            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:latest
-            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
-            ${{ env.DOCKER_USER }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_sha_short.outputs.sha_short }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_sha_short.outputs.sha_short }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:latest
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:${{ github.event.client_payload.release_tag_name }}-${{ steps.get_sha_short.outputs.sha_short }}
