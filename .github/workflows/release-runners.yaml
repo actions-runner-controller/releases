@@ -89,7 +89,7 @@ jobs:
         with:
           repository: actions/actions-runner-controller
           path: arc/
-          ref: ${{ github.event.inputs.sha }}
+          ref: ${{ inputs.sha }}
 
       - name: Get Short SHA
         id: vars
