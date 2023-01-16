@@ -42,7 +42,7 @@ The main reason why these workflows were extracted is that pushing container ima
 |  | *pull_request: [master]+---+                          |                                 |                             +---+ DockerHub: summerwind |     |
 |  |                        |   |  +---------------------+ |                                 |    +---------------------+  |   |                       |     |
 |  +------------------------+   |  |                     | |    *workflow_dispatch           |    |                     |  |   +-----------------------+     |
-|                               +--+ runners.yaml        +-+---------------------------------+----+ release-runners.yaml+--+                                 |
+|                               +--+ release-runners.yaml+-+---------------------------------+----+ release-runners.yaml+--+                                 |
 |  +------------------------+   |  |                     | |                                 |    |                     |  |   +-----------------------+     |
 |  |                        |   |  +---------------------+ |                                 |    +---------------------+  |   |                       |     |
 |  | *push: [master]        +---+                          |                                 |                             +---+ GHCR                  |     |
@@ -57,6 +57,19 @@ The main reason why these workflows were extracted is that pushing container ima
 ### Release new runner images (release-runners.yaml)
 
 ### Using the CLI
+
+```mermaid
+flowchart LR
+    workflow["release-runners.yaml"] -- workflow_dispatch* --> workflow_b["release-runners.yaml"]
+    subgraph org: actions
+    event_a{{"push"}} -- triggers --> workflow["release-runners.yaml"]
+    end
+    subgraph org: actions-runner-controller
+    workflow_b["release-runners.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner:*"]
+    workflow_b["release-runners.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner:*"]
+    event_b{{"workflow_dispatch"}} -- triggers --> workflow_b["release-runners.yaml"]
+    end
+```
 
 You can trigger the workflow from the CLI using the following command:
 
