@@ -56,8 +56,6 @@ The main reason why these workflows were extracted is that pushing container ima
 
 ### Release new runner images (release-runners.yaml)
 
-### Using the CLI
-
 ```mermaid
 flowchart LR
     workflow["release-runners.yaml"] -- workflow_dispatch* --> workflow_b["release-runners.yaml"]
