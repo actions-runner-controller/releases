@@ -73,6 +73,18 @@ jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "
 
 ### Publish canary images (publish-canary.yaml)
 
+```mermaid
+flowchart LR
+    subgraph org: actions
+    event_a{{"push: [master]"}} -- triggers --> workflow_a["publish-canary.yaml"]
+    end
+    subgraph org: actions-runner-controller
+    workflow_a["publish-canary.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-canary.yaml"]
+    workflow_b["publish-canary.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner-controller:canary"]
+    workflow_b["publish-canary.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner-controller:canary"]
+    end
+```
+
 This workflow is triggered whenever a new commit is pushed to the `master` branch in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
 
 For troubleshooting purposes you can run this workflow with:
