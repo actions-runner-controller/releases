@@ -4,54 +4,6 @@ This repository contains the workflows needed to release new runner images whene
 
 The main reason why these workflows were extracted is that pushing container images to GHRC with GitHub App authentication is not possible at the moment.
 
-```text
-+----------------------------------------------------------+                                 +---------------------------------------------------------------+
-|  actions org                                             |                                 | actions-runner-controller org                                 |
-|                                                          |                                 |                                                               |
-+----------------------------------------------------------+                                 +---------------------------------------------------------------+
-|                                                          |                                 |                                                               |
-|                                                          |                                 |                                                               |
-|  +------------------------+                              |                                 |                                +-----------------------+      |
-|  |                        |                              |                                 |                                |                       |      |
-|  | *release: [published]  +---+                          |                                 |                            +---+ DockerHub: summerwind |      |
-|  |                        |   |  +---------------------+ |                                 |   +---------------------+  |   |                       |      |
-|  +------------------------+   |  |                     | |    *repository_dispatch         |   |                     |  |   +-----------------------+      |
-|                               +--+ publish-arc.yaml    +-+---------------------------------+---+ publish-arc.yaml    +--+                                  |
-|  +------------------------+   |  |                     | |                                 |   |                     |  |   +-----------------------+      |
-|  |                        |   |  +---------------------+ |                                 |   +---------------------+  |   |                       |      |
-|  | *workflow_dispatch     +---+                          |                                 |                            +---+ GHCR                  |      |
-|  |                        |                              |                                 |                                |                       |      |
-|  +------------------------+                              |                                 |                                +-----------------------+      |
-|                                                          |                                 |                                                               |
-|                                                          |                                 |                                                               |
-|                                                          |                                 |                                                               |
-|                                                          |                                 |                                +-----------------------+      |
-|                                                          |                                 |                                |                       |      |
-|                                                          |                                 |                            +---+ DockerHub: summerwind |      |
-|  +------------------------+      +---------------------+ |                                 |   +---------------------+  |   |                       |      |
-|  |                        |      |                     | |    *repository_dispatch         |   |                     |  |   +-----------------------+      |
-|  | *push: [master]        +------+ publish-canary.yaml +-+---------------------------------+---+ publish-canary.yaml +--+                                  |
-|  |                        |      |                     | |                                 |   |                     |  |   +-----------------------+      |
-|  +------------------------+      +---------------------+ |                                 |   +---------------------+  |   |                       |      |
-|                                                          |                                 |                            +---+ GHCR                  |      |
-|                                                          |                                 |                                |                       |      |
-|                                                          |                                 |                                +-----------------------+      |
-|                                                          |                                 |                                                               |
-|  +------------------------+                              |                                 |                                 +-----------------------+     |
-|  |                        |                              |                                 |                                 |                       |     |
-|  | *pull_request: [master]+---+                          |                                 |                             +---+ DockerHub: summerwind |     |
-|  |                        |   |  +---------------------+ |                                 |    +---------------------+  |   |                       |     |
-|  +------------------------+   |  |                     | |    *workflow_dispatch           |    |                     |  |   +-----------------------+     |
-|                               +--+ release-runners.yaml+-+---------------------------------+----+ release-runners.yaml+--+                                 |
-|  +------------------------+   |  |                     | |                                 |    |                     |  |   +-----------------------+     |
-|  |                        |   |  +---------------------+ |                                 |    +---------------------+  |   |                       |     |
-|  | *push: [master]        +---+                          |                                 |                             +---+ GHCR                  |     |
-|  |                        |                              |                                 |                                 |                       |     |
-|  +------------------------+                              |                                 |                                 +-----------------------+     |
-|                                                          |                                 |                                                               |
-+----------------------------------------------------------+                                 +---------------------------------------------------------------+
-```
-
 ## Usage
 
 ### Release new runner images (release-runners.yaml)
@@ -63,8 +15,8 @@ flowchart LR
     event_a{{"push"}} -- triggers --> workflow["release-runners.yaml"]
     end
     subgraph org: actions-runner-controller
-    workflow_b["release-runners.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner:*"]
-    workflow_b["release-runners.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner:*"]
+    workflow_b["release-runners.yaml"] -- push --> A["GHCR: \n actions-runner-controller/actions-runner:* \n actions-runner-controller/actions-runner-dind:* \n actions-runner-controller/actions-runner-dind-rootless:*"]
+    workflow_b["release-runners.yaml"] -- push --> B["DockerHub: \n summerwind/actions-runner:* \n summerwind/actions-runner-dind:* \n summerwind/actions-runner-dind-rootless:*"]
     event_b{{"workflow_dispatch"}} -- triggers --> workflow_b["release-runners.yaml"]
     end
 ```
@@ -90,6 +42,20 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
 
 ### Publish (arc) controller images (publish-arc.yaml)
+
+```mermaid
+flowchart LR
+    subgraph org: actions
+    event_a{{"release: published"}} -- triggers --> workflow_a["publish-arc.yaml"]
+    event_b{{"workflow_dispatch"}} -- triggers --> workflow_a["publish-arc.yaml"]
+    workflow_a["publish-arc.yaml"] -- uploads --> package["actions-runner-controller.tar.gz"]
+    end
+    subgraph org: actions-runner-controller
+    workflow_a["publish-arc.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-arc.yaml"]
+    workflow_b["publish-arc.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner-controller:*"]
+    workflow_b["publish-arc.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner-controller:*"]
+    end
+```
 
 This workflow is triggered whenever a new release is published in [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller). It will build the actions-runner-controller images and push them to DockerHub and GHCR.
 
