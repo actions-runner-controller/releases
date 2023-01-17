@@ -91,11 +91,11 @@ jobs:
           path: arc/
           ref: ${{ inputs.sha }}
 
-      - name: Get Short SHA
-        id: vars
+      - name: Export env vars
         run: |
-            echo "sha_short=$(git -C $GITHUB_WORKSPACE/arc rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        shell: bash
+            echo "SHA_SHORT=$(git -C $GITHUB_WORKSPACE/arc rev-parse --short HEAD)" >> $GITHUB_ENV
+            echo "LATEST_TAG_DOCKER=${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest" >> $GITHUB_ENV
+            echo "LATEST_TAG_GHCR=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest" >> $GITHUB_ENV
 
       - name: Build and Push Versioned Tags
         uses: docker/build-push-action@v3
@@ -103,7 +103,9 @@ jobs:
           context: ./arc/runner
           file: ./arc/runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}.dockerfile
           platforms: linux/amd64,linux/arm64
+          pull: true
           push: ${{ inputs.push_to_registries }}
+          provenance: false
           build-args: |
             RUNNER_VERSION=${{ inputs.runner_version }}
             DOCKER_VERSION=${{ inputs.docker_version }}
@@ -111,30 +113,11 @@ jobs:
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:${{ matrix.os-name }}-${{ matrix.os-version }}
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ env.SHA_SHORT }}
+            ${{ matrix.latest == 'true' && env.LATEST_TAG_DOCKER || '' }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:${{ matrix.os-name }}-${{ matrix.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ steps.vars.outputs.sha_short }}
-          cache-from: type=gha,scope=build-${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}
-
-      # NOTE : Only to be used on the 20.04 image until we remove the latest tag entirely
-      # at which point this step needs to be deleted
-      # https://github.com/actions/actions-runner-controller/issues/2056
-      - name: Build and Push Latest Tags
-        if: ${{ matrix.latest == 'true' }}
-        uses: docker/build-push-action@v3
-        with:
-          context: ./arc/runner
-          file: ./arc/runner/${{ matrix.name }}.${{ matrix.os-name }}-${{ matrix.os-version }}.dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: ${{ inputs.push_to_registries }}
-          build-args: |
-            RUNNER_VERSION=${{ inputs.runner_version }}
-            DOCKER_VERSION=${{ inputs.docker_version }}
-            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
-          tags: |
-            ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest
-          cache-from: type=gha,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ env.SHA_SHORT }}
+            ${{ matrix.latest == 'true' && env.LATEST_TAG_GHCR || '' }}
+          cache-from: type=registry,ref=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+          cache-to: type=inline
