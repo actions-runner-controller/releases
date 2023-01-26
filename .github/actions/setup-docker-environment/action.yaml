@@ -32,7 +32,10 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
       with:
-        version: latest
+        # Pinning v0.9.1 for Buildx which uses BuildKit v0.10
+        # Buildx v0.10 uses BuildKit v0.11 which has a bug causing intermittent 
+        # failures pushing images to GHCR
+        version: v0.9.1
 
     - name: Login to DockerHub
       if: ${{ github.event_name == 'release' || github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' }}
