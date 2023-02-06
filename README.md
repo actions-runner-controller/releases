@@ -12,7 +12,10 @@ The main reason why these workflows were extracted is that pushing container ima
 flowchart LR
     workflow["release-runners.yaml"] -- workflow_dispatch* --> workflow_b["release-runners.yaml"]
     subgraph org: actions
-    event_a{{"push"}} -- triggers --> workflow["release-runners.yaml"]
+    update_runners_workflow["update-runners.yaml"] -- polls (daily) --> runner_releases["actions/runner/releases"]
+    update_runners_workflow -- creates --> runner_update_pr["PR: update /runner/VERSION"]
+    runner_update_pr --> runner_update_pr_merge{{"merge"}}
+    runner_update_pr_merge -- triggers --> workflow["release-runners.yaml"]
     end
     subgraph org: actions-runner-controller
     workflow_b["release-runners.yaml"] -- push --> A["GHCR: \n actions-runner-controller/actions-runner:* \n actions-runner-controller/actions-runner-dind:* \n actions-runner-controller/actions-runner-dind-rootless:*"]
