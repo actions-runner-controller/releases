@@ -29,7 +29,7 @@ You can trigger the workflow from the CLI using the following command:
 ```bash
 gh workflow run release-runners.yaml -R actions-runner-controller/releases \
     -f runner_version=2.300.2 \
-    -f docker_version=20.10.12 \
+    -f docker_version=23.0.1 \
     -f runner_container_hooks_version=0.2.0 \
     -f sha='3acef9e2863a2585142a566e78e5840b9cd22d9a' \
     -f push_to_registries=true
@@ -39,7 +39,7 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 | Parameter | Description | Default |
 | --- | --- | --- |
 | runner_version | The version of the runner binaries to use | `2.300.2` |
-| docker_version | The version of the docker binaries to use | `20.10.12` |
+| docker_version | The version of the docker binaries to use | `23.0.1` |
 | runner_container_hooks_version | The version of the runner container hooks to use | `0.2.0` |
 | sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | Empty string. |
 | push_to_registries | Whether to push the images to the registries. Use false to test the build | false |

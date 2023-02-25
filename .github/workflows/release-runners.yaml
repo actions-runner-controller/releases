@@ -10,7 +10,7 @@ on:
       docker_version:
         description: 'Docker Version'
         required: false
-        default: '20.10.12'
+        default: '23.0.1'
       runner_container_hooks_version:
         description: 'Runner Container Hooks Version'
         required: true
