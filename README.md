@@ -49,12 +49,12 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 ```mermaid
 flowchart LR
     subgraph repository: actions/actions-runner-controller
-    event_a{{"release: published"}} -- triggers --> workflow_a["publish-arc.yaml"]
-    event_b{{"workflow_dispatch"}} -- triggers --> workflow_a["publish-arc.yaml"]
-    workflow_a["publish-arc.yaml"] -- uploads --> package["actions-runner-controller.tar.gz"]
+    event_a{{"release: published"}} -- triggers --> workflow_a["arc-publish.yaml"]
+    event_b{{"workflow_dispatch"}} -- triggers --> workflow_a["arc-publish.yaml"]
+    workflow_a["arc-publish.yaml"] -- uploads --> package["actions-runner-controller.tar.gz"]
     end
     subgraph repository: actions-runner-controller/releases
-    workflow_a["publish-arc.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-arc.yaml"]
+    workflow_a["arc-publish.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-arc.yaml"]
     workflow_b["publish-arc.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner-controller:*"]
     workflow_b["publish-arc.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner-controller:*"]
     end
