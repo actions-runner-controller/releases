@@ -11,13 +11,13 @@ The main reason why these workflows were extracted is that pushing container ima
 ```mermaid
 flowchart LR
     workflow["release-runners.yaml"] -- workflow_dispatch* --> workflow_b["release-runners.yaml"]
-    subgraph org: actions
-    update_runners_workflow["update-runners.yaml"] -- "polls (daily)" --> runner_releases["actions/runner/releases"]
-    update_runners_workflow -- creates --> runner_update_pr["PR: update /runner/VERSION"]
+    subgraph repository: actions/actions-runner-controller
+    runner_updates_check["arc-update-runners-scheduled.yaml"] -- "polls (daily)" --> runner_releases["actions/runner/releases"]
+    runner_updates_check -- creates --> runner_update_pr["PR: update /runner/VERSION"]
     runner_update_pr --> runner_update_pr_merge{{"merge"}}
     runner_update_pr_merge -- triggers --> workflow["release-runners.yaml"]
     end
-    subgraph org: actions-runner-controller
+    subgraph repository: actions-runner-controller/releases
     workflow_b["release-runners.yaml"] -- push --> A["GHCR: \n actions-runner-controller/actions-runner:* \n actions-runner-controller/actions-runner-dind:* \n actions-runner-controller/actions-runner-dind-rootless:*"]
     workflow_b["release-runners.yaml"] -- push --> B["DockerHub: \n summerwind/actions-runner:* \n summerwind/actions-runner-dind:* \n summerwind/actions-runner-dind-rootless:*"]
     event_b{{"workflow_dispatch"}} -- triggers --> workflow_b["release-runners.yaml"]
@@ -36,25 +36,25 @@ gh workflow run release-runners.yaml -R actions-runner-controller/releases \
 ```
 
 <!-- Table of Paramters -->
-| Parameter | Description | Default |
-| --- | --- | --- |
-| runner_version | The version of the runner binaries to use | `2.300.2` |
-| docker_version | The version of the docker binaries to use | `20.10.12` |
-| runner_container_hooks_version | The version of the runner container hooks to use | `0.2.0` |
-| sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | Empty string. |
-| push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
+| Parameter                        | Description                                                                                                                                                                                                                         | Default       |
+|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `runner_version`                 | The version of the [actions/runner](https://github.com/actions/runner) to use                                                                                                                                                       | `2.300.2`     |
+| `docker_version`                 | The version of docker to use                                                                                                                                                                                                        | `20.10.12`    |
+| `runner_container_hooks_version` | The version of [actions/runner-container-hooks](https://github.com/actions/runner-container-hooks) to use                                                                                                                           | `0.2.0`       |
+| `sha`                            | The commit sha from [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller) to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images | Empty string. |
+| `push_to_registries`             | Whether to push the images to the registries. Use false to test the build                                                                                                                                                           | false         |
 
 ### Publish (arc) controller images (publish-arc.yaml)
 
 ```mermaid
 flowchart LR
-    subgraph org: actions
-    event_a{{"release: published"}} -- triggers --> workflow_a["publish-arc.yaml"]
-    event_b{{"workflow_dispatch"}} -- triggers --> workflow_a["publish-arc.yaml"]
-    workflow_a["publish-arc.yaml"] -- uploads --> package["actions-runner-controller.tar.gz"]
+    subgraph repository: actions/actions-runner-controller
+    event_a{{"release: published"}} -- triggers --> workflow_a["arc-publish.yaml"]
+    event_b{{"workflow_dispatch"}} -- triggers --> workflow_a["arc-publish.yaml"]
+    workflow_a["arc-publish.yaml"] -- uploads --> package["actions-runner-controller.tar.gz"]
     end
-    subgraph org: actions-runner-controller
-    workflow_a["publish-arc.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-arc.yaml"]
+    subgraph repository: actions-runner-controller/releases
+    workflow_a["arc-publish.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-arc.yaml"]
     workflow_b["publish-arc.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner-controller:*"]
     workflow_b["publish-arc.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner-controller:*"]
     end
@@ -69,8 +69,8 @@ jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| release_tag_name | The version of the runner binaries to use | Empty string. Field required. |
-| push_to_registries | The version of the docker binaries to use | Empty string. Field required. |
+| release_tag_name | The controller image tag to use. This is not a git tag. | Empty string. Field required. |
+| push_to_registries | Whether to push the image to the registries. Use false to test the build | false |
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false. Otherwise, built images will be pushed to the registries.
 
@@ -78,10 +78,10 @@ jq -n '{"event_type": "arc", "client_payload": {"release_tag_name": "v0.26.0", "
 
 ```mermaid
 flowchart LR
-    subgraph org: actions
+    subgraph repository: actions/actions-runner-controller
     event_a{{"push: [master]"}} -- triggers --> workflow_a["publish-canary.yaml"]
     end
-    subgraph org: actions-runner-controller
+    subgraph repository: actions-runner-controller/releases
     workflow_a["publish-canary.yaml"] -- triggers --> event_d{{"repository_dispatch"}} --> workflow_b["publish-canary.yaml"]
     workflow_b["publish-canary.yaml"] -- push --> A["GHCR: \nactions-runner-controller/actions-runner-controller:canary"]
     workflow_b["publish-canary.yaml"] -- push --> B["DockerHub: \nsummerwind/actions-runner-controller:canary"]
@@ -101,6 +101,6 @@ jq -n '{"event_type": "canary", "client_payload": {"sha": "84104de74b8e9e555f530
 | Parameter | Description | Default |
 | --- | --- | --- |
 | sha | The commit sha to be used to build the runner images. This will be provided to `actions/checkout` & used to tag the container images  | Empty string. Field required. |
-| push_to_registries | Whether to push the images to the registries. Use false to test the build | Empty string. Field required. |
+| push_to_registries | Whether to push the images to the registries. Use false to test the build | false |
 
 **NOTE:** this workflow should never be triggered manually unless `push_to_registries` is set to false.
