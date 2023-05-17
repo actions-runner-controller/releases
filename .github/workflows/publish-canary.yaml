@@ -24,6 +24,10 @@ env:
   TARGET_ORG: actions-runner-controller
   TARGET_REPO: actions-runner-controller
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   canary-build:
     name: Build and Publish Canary Image
