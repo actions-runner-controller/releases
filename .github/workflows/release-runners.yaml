@@ -112,12 +112,13 @@ jobs:
             echo "SHA_SHORT=$(git -C $GITHUB_WORKSPACE/arc rev-parse --short HEAD)" >> $GITHUB_ENV
             echo "LATEST_TAG_DOCKER=${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:latest" >> $GITHUB_ENV
             echo "LATEST_TAG_GHCR=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:latest" >> $GITHUB_ENV
+            echo "DOCKERFILE_PREFIX=./arc/runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}" >> $GITHUB_ENV
 
       - name: Build and Push Versioned Tags
         uses: docker/build-push-action@v3
         with:
           context: ./arc/runner
-          file: ./arc/runner/${{ matrix.name }}.${{matrix.os-name}}-${{ matrix.os-version }}.dockerfile
+          file: ${{ env.DOCKERFILE_PREFIX }}.dockerfile
           platforms: linux/amd64,linux/arm64
           pull: true
           push: ${{ inputs.push_to_registries }}
@@ -129,10 +130,35 @@ jobs:
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:${{ matrix.os-name }}-${{ matrix.os-version }}
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ env.SHA_SHORT }}
-            ${{ matrix.latest == 'true' && env.LATEST_TAG_DOCKER || '' }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:${{ matrix.os-name }}-${{ matrix.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}-${{ env.SHA_SHORT }}
-            ${{ matrix.latest == 'true' && env.LATEST_TAG_GHCR || '' }}
+          cache-from: type=registry,ref=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+          cache-to: type=inline
+
+      - name: Generate Dockerfile for image with latest tag
+        if: ${{ matrix.latest == 'true' }}
+        run: |
+          tee ${{ env.DOCKERFILE_PREFIX }}.latest.dockerfile <<EOF
+          FROM ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.name }}:${{ matrix.os-name }}-${{ matrix.os-version }}
+          ENV SHOW_LATEST_TAG_WARN=1
+          EOF
+
+      - name: Build and Push Versioned Tags
+        if: ${{ matrix.latest == 'true' }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ./arc/runner
+          file: ${{ env.DOCKERFILE_PREFIX }}.latest.dockerfile
+          platforms: linux/amd64,linux/arm64
+          pull: true
+          push: ${{ inputs.push_to_registries }}
+          build-args: |
+            RUNNER_VERSION=${{ inputs.runner_version }}
+            DOCKER_VERSION=${{ inputs.docker_version }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
+          tags: |
+            ${{ env.LATEST_TAG_DOCKER }}
+            ${{ env.LATEST_TAG_GHCR }}
           cache-from: type=registry,ref=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ matrix.name }}:v${{ inputs.runner_version }}-${{ matrix.os-name }}-${{ matrix.os-version }}
           cache-to: type=inline
