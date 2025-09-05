@@ -54,19 +54,19 @@ jobs:
           - name: actions-runner
             os-name: ubuntu
             os-version: 20.04
-            latest: "true"
-          - name: actions-runner
-            os-name: ubuntu
-            os-version: 22.04
             latest: "false"
           - name: actions-runner
             os-name: ubuntu
-            os-version: 24.04
+            os-version: 22.04
             latest: "false"
+          - name: actions-runner
+            os-name: ubuntu
+            os-version: 24.04
+            latest: "true"
           - name: actions-runner-dind
             os-name: ubuntu
             os-version: 20.04
-            latest: "true"
+            latest: "false"
           - name: actions-runner-dind
             os-name: ubuntu
             os-version: 22.04
@@ -74,11 +74,11 @@ jobs:
           - name: actions-runner-dind
             os-name: ubuntu
             os-version: 24.04
-            latest: "false"
+            latest: "true"
           - name: actions-runner-dind-rootless
             os-name: ubuntu
             os-version: 20.04
-            latest: "true"
+            latest: "false"
           - name: actions-runner-dind-rootless
             os-name: ubuntu
             os-version: 22.04
@@ -86,7 +86,7 @@ jobs:
           - name: actions-runner-dind-rootless
             os-name: ubuntu
             os-version: 24.04
-            latest: "false"
+            latest: "true"
 
     steps:
       - name: Checkout
